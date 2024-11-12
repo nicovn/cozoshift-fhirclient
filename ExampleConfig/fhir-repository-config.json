@@ -1,0 +1,55 @@
+{
+    "Name": "COZO SHIFT Acceptance",
+    "FhirEndpoint": "https://fhirtest.internal.cozo.be/fhirstation-rest/api/fhir/",
+    "OauthTokenEndpoint": "https://fhirtest.internal.cozo.be/auth/realms/fhir-station/protocol/openid-connect/token",
+    "OauthClientId": "shift_uc_2_hospital",
+    "OauthScopes": "fhir-station-application",
+    "JwkSetUrl": "https://api-acpt.ehealth.fgov.be/etee/v1/pubKeys/cacerts/jwks?identifier=71045471&type=NIHII-HOSPITAL&use=sig",
+    "JwkSetKeyId": "S5170314792358133650",
+    "RsaPrivateKeyPEMEncoded": null,
+    "KeystoreFile": "C:\\Users\\amaron\\CoZoSHIFT\\NIHII-HOSPITAL=xxxxxxxx 20221011-145600.acc-p12",
+    "KeystoreFilePassword": null,
+    "MaxResultsPerPage": 200,
+    "UserInputDefaults": {
+        "Patients": [
+            {
+                "Name": "TestShiftA Ludo",
+                "INSZ": "67082799744"
+            },
+            {
+                "Name": "TestShiftB Carmen",
+                "INSZ": "01051399657"
+            },
+            {
+                "Name": "TestShiftC Frans",
+                "INSZ": "53070899722"
+            },
+            {
+                "Name": "TestShiftD Olga",
+                "INSZ": "85120999819"
+            }
+        ],
+        "Users": [
+            {
+                "Title": "Dr.",
+                "LastName": "Test",
+                "GivenName": "Een",
+                "Role": "persphysician",
+                "RIZIV": "11945648340",
+                "INSZ": null
+            },
+            {
+                "Title": "Verpleegster",
+                "LastName": "Van Ouytsel",
+                "GivenName": "Maria",
+                "Role": "persnurse",
+                "RIZIV": null,
+                "INSZ": "96101000000"
+            }
+        ],
+        "Organization": {
+            "Name": "Ziekenhuisnaam",
+            "RIZIV": "71045471"
+        }
+    }
+}
