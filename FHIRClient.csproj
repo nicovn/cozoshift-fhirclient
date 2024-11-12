@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>    
+    <Company>Amaron bv</Company>
+    <Copyright>Copyright (c) 2024</Copyright>
+    <Product>CoZo SHIFT FHIR test client</Product>
+    <Description>Test tool that is used to validate CoZo SHIFT use case 2</Description>
+    <Version>1.0.0.3</Version>
+    <Authors>nico@amaron.be</Authors>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.3.1" />
+    <PackageReference Include="Hl7.Fhir.R4" Version="5.7.0" />
+    <PackageReference Include="IdentityModel.OidcClient" Version="6.0.0" />
+    <PackageReference Include="jose-jwt" Version="5.0.0" />
+    <PackageReference Include="Sharprompt" Version="2.4.5" />
+  </ItemGroup>
+
+</Project>
