@@ -287,6 +287,14 @@ class Program
 
         }
 
+        // Add specific query parameters for FHIRStation debugging
+        if ((fhirRepositoryConfig.FhirEndpoint.EndsWith("/fhirstation-rest/api/fhir")) ||
+            (fhirRepositoryConfig.FhirEndpoint.EndsWith("/fhirstation-rest/api/fhir/")))
+        {
+            defaultQueryString.Add("_AMARON_tracing", "true");
+            defaultQueryString.Add("_AMARON_tracing_payload", "true");
+        }
+
         var defaultSearchQueryString = System.Web.HttpUtility.UrlDecode(defaultQueryString.ToString());
         if (fhirResourceName != "")
         {
