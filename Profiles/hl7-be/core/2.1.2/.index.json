@@ -1,0 +1,358 @@
+{
+  "index-version" : 2,
+  "files" : [
+    {
+      "filename" : "ImplementationGuide-hl7.fhir.be.core.json",
+      "resourceType" : "ImplementationGuide",
+      "id" : "hl7.fhir.be.core",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/ImplementationGuide/hl7.fhir.be.core",
+      "version" : "2.1.2"
+    },
+    {
+      "filename" : "CodeSystem-be-cs-care-location.json",
+      "resourceType" : "CodeSystem",
+      "id" : "be-cs-care-location",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/CodeSystem/be-cs-care-location",
+      "version" : "2.1.2",
+      "content" : "complete"
+    },
+    {
+      "filename" : "CodeSystem-cd-civilstate.json",
+      "resourceType" : "CodeSystem",
+      "id" : "cd-civilstate",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/CodeSystem/cd-civilstate",
+      "version" : "2.1.2",
+      "content" : "complete"
+    },
+    {
+      "filename" : "CodeSystem-cd-contact-person.json",
+      "resourceType" : "CodeSystem",
+      "id" : "cd-contact-person",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/CodeSystem/cd-contact-person",
+      "version" : "2.1.2",
+      "content" : "complete"
+    },
+    {
+      "filename" : "CodeSystem-cd-fed-country.json",
+      "resourceType" : "CodeSystem",
+      "id" : "cd-fed-country",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/CodeSystem/cd-fed-country",
+      "version" : "2.1.2",
+      "content" : "fragment"
+    },
+    {
+      "filename" : "CodeSystem-cd-hcparty.json",
+      "resourceType" : "CodeSystem",
+      "id" : "cd-hcparty",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/CodeSystem/cd-hcparty",
+      "version" : "2.1.2",
+      "content" : "complete"
+    },
+    {
+      "filename" : "NamingSystem-be-cbe.json",
+      "resourceType" : "NamingSystem",
+      "id" : "be-cbe",
+      "kind" : "identifier"
+    },
+    {
+      "filename" : "NamingSystem-be-ehp.json",
+      "resourceType" : "NamingSystem",
+      "id" : "be-ehp",
+      "kind" : "identifier"
+    },
+    {
+      "filename" : "NamingSystem-be-insurancenumber.json",
+      "resourceType" : "NamingSystem",
+      "id" : "be-insurancenumber",
+      "kind" : "identifier"
+    },
+    {
+      "filename" : "NamingSystem-be-insurancymembership.json",
+      "resourceType" : "NamingSystem",
+      "id" : "be-insurancymembership",
+      "kind" : "identifier"
+    },
+    {
+      "filename" : "NamingSystem-be-nihdi.json",
+      "resourceType" : "NamingSystem",
+      "id" : "be-nihdi",
+      "kind" : "identifier"
+    },
+    {
+      "filename" : "NamingSystem-be-ns-nihdi-nomenclature.json",
+      "resourceType" : "NamingSystem",
+      "id" : "be-ns-nihdi-nomenclature",
+      "kind" : "identifier"
+    },
+    {
+      "filename" : "NamingSystem-be-ns-nihdi-organization.json",
+      "resourceType" : "NamingSystem",
+      "id" : "be-ns-nihdi-organization",
+      "kind" : "identifier"
+    },
+    {
+      "filename" : "NamingSystem-be-ns-nihdi-professional.json",
+      "resourceType" : "NamingSystem",
+      "id" : "be-ns-nihdi-professional",
+      "kind" : "identifier"
+    },
+    {
+      "filename" : "NamingSystem-be-ssin.json",
+      "resourceType" : "NamingSystem",
+      "id" : "be-ssin",
+      "kind" : "identifier"
+    },
+    {
+      "filename" : "StructureDefinition-BeGroup.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeGroup",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/BeGroup",
+      "version" : "2.1.2",
+      "kind" : "resource",
+      "type" : "Group",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-BeModelConsent.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeModelConsent",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/BeModelConsent",
+      "version" : "2.1.2",
+      "kind" : "logical",
+      "type" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/BeModelConsent",
+      "derivation" : "specialization"
+    },
+    {
+      "filename" : "StructureDefinition-BeModelGroup.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeModelGroup",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/BeModelGroup",
+      "version" : "2.1.2",
+      "kind" : "logical",
+      "type" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/BeModelGroup",
+      "derivation" : "specialization"
+    },
+    {
+      "filename" : "StructureDefinition-BeModelPatient.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeModelPatient",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/BeModelPatient",
+      "version" : "2.1.2",
+      "kind" : "logical",
+      "type" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/BeModelPatient",
+      "derivation" : "specialization"
+    },
+    {
+      "filename" : "StructureDefinition-BeModelPatientDocument.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeModelPatientDocument",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/BeModelPatientDocument",
+      "version" : "2.1.2",
+      "kind" : "logical",
+      "type" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/BeModelPatientDocument",
+      "derivation" : "specialization"
+    },
+    {
+      "filename" : "StructureDefinition-be-Consent.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-Consent",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-Consent",
+      "version" : "2.1.2",
+      "kind" : "resource",
+      "type" : "Consent",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-address.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-address",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-address",
+      "version" : "2.1.2",
+      "kind" : "complex-type",
+      "type" : "Address",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-coded-annotation.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-coded-annotation",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-coded-annotation",
+      "version" : "2.1.2",
+      "kind" : "complex-type",
+      "type" : "Annotation",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-communication.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-communication",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-communication",
+      "version" : "2.1.2",
+      "kind" : "resource",
+      "type" : "Communication",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-documentreference.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-documentreference",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-documentreference",
+      "version" : "2.1.2",
+      "kind" : "resource",
+      "type" : "DocumentReference",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-ext-codeable-reference.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-ext-codeable-reference",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-ext-codeable-reference",
+      "version" : "2.1.2",
+      "kind" : "complex-type",
+      "type" : "Extension",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-ext-codeableconcept.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-ext-codeableconcept",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-ext-codeableconcept",
+      "version" : "2.1.2",
+      "kind" : "complex-type",
+      "type" : "Extension",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-ext-gender-at-birth.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-ext-gender-at-birth",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-ext-gender-at-birth",
+      "version" : "2.1.2",
+      "kind" : "complex-type",
+      "type" : "Extension",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-ext-recorder.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-ext-recorder",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-ext-recorder",
+      "version" : "2.1.2",
+      "kind" : "complex-type",
+      "type" : "Extension",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-ext-simple-note.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-ext-simple-note",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-ext-simple-note",
+      "version" : "2.1.2",
+      "kind" : "complex-type",
+      "type" : "Extension",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-location.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-location",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-location",
+      "version" : "2.1.2",
+      "kind" : "resource",
+      "type" : "Location",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-organization.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-organization",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-organization",
+      "version" : "2.1.2",
+      "kind" : "resource",
+      "type" : "Organization",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-patient.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-patient",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-patient",
+      "version" : "2.1.2",
+      "kind" : "resource",
+      "type" : "Patient",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-practitioner.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-practitioner",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-practitioner",
+      "version" : "2.1.2",
+      "kind" : "resource",
+      "type" : "Practitioner",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-practitionerrole.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-practitionerrole",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-practitionerrole",
+      "version" : "2.1.2",
+      "kind" : "resource",
+      "type" : "PractitionerRole",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-provenance.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-provenance",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/StructureDefinition/be-provenance",
+      "version" : "2.1.2",
+      "kind" : "resource",
+      "type" : "Provenance",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "ValueSet-be-civilstate.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-civilstate",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/ValueSet/be-civilstate",
+      "version" : "2.1.2"
+    },
+    {
+      "filename" : "ValueSet-be-contactperson.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-contactperson",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/ValueSet/be-contactperson",
+      "version" : "2.1.2"
+    },
+    {
+      "filename" : "ValueSet-be-vs-care-location.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-vs-care-location",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/ValueSet/be-vs-care-location",
+      "version" : "2.1.2"
+    },
+    {
+      "filename" : "ValueSet-be-vs-cd-hcparty.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-vs-cd-hcparty",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/ValueSet/be-vs-cd-hcparty",
+      "version" : "2.1.2"
+    },
+    {
+      "filename" : "ValueSet-be-vs-gender-at-birth.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-vs-gender-at-birth",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/ValueSet/be-vs-gender-at-birth",
+      "version" : "2.1.2"
+    },
+    {
+      "filename" : "ValueSet-be-vs-patient-relationship-type.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-vs-patient-relationship-type",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core/ValueSet/be-vs-patient-relationship-type",
+      "version" : "2.1.2"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "name" : "hl7.fhir.be.core",
+  "version" : "2.1.2",
+  "tools-version" : 3,
+  "type" : "IG",
+  "date" : "20241002140534",
+  "license" : "CC0-1.0",
+  "canonical" : "https://www.ehealth.fgov.be/standards/fhir/core",
+  "notForPublication" : true,
+  "url" : "https://build.fhir.org/ig/hl7-be/core/",
+  "title" : "eHealth Platform Federal Core Profiles",
+  "description" : "eHealth Platform Federal Core Profiles (built Wed, Oct 2, 2024 14:05+0000+00:00)",
+  "fhirVersions" : ["4.0.1"],
+  "dependencies" : {
+    "hl7.fhir.r4.core" : "4.0.1",
+    "hl7.terminology.r4" : "6.0.2",
+    "hl7.fhir.uv.extensions.r4" : "5.1.0"
+  },
+  "author" : "eHealth Platform",
+  "maintainers" : [
+    {
+      "name" : "eHealth Platform",
+      "email" : "support@be-ehealth-standards.atlassian.net",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir"
+    },
+    {
+      "name" : "Message Structure eHealth",
+      "email" : "support@be-ehealth-standards.atlassian.net"
+    }
+  ],
+  "directories" : {
+    "lib" : "package",
+    "example" : "example"
+  },
+  "jurisdiction" : "urn:iso:std:iso:3166#BE"
+}

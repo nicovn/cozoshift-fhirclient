@@ -11,6 +11,9 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Asn1; // For DerObjectIdentifier
+using Org.BouncyCastle.Asn1.X9; // For ECNamedCurveTable, X9ECParameters
+using Org.BouncyCastle.Math; // For BigInteger
 using Jose;
 using System.Collections.Immutable;
 using Newtonsoft.Json;
@@ -22,10 +25,16 @@ using System.ComponentModel.DataAnnotations;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using Org.BouncyCastle.Pkcs;
-using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Pkcs;
 using System.Runtime.Versioning;
 using Org.BouncyCastle.Utilities.IO.Pem;
+using Hl7.Fhir.Specification;
+using Hl7.Fhir.Specification.Source;
+using Hl7.Fhir.Specification.Terminology;
+using Firely.Fhir.Packages;
+using Firely.Fhir.Validation;
+using Org.BouncyCastle.Asn1.X9;
+using Org.BouncyCastle.Asn1.Sec;
 
 class Program
 {
@@ -501,6 +510,8 @@ class Program
                         WriteToLog(baseFilePath, correlationId, "");
                         WriteToLog(baseFilePath, correlationId, JToken.Parse(results.ToJson()).ToString(Formatting.Indented));
 
+                        await ValidateResourceAgainstBEProfile(baseFilePath, correlationId, client, results);
+
                         await FetchConditionsPractitionerRole(client, results);
 
                         while (results != null)
@@ -634,6 +645,96 @@ class Program
         return practitionerRoleFetched;
     }
 
+    private static async Task<bool> ValidateResourceAgainstBEProfile(string baseFilePath, string correlationId, FhirClient client, Hl7.Fhir.Model.Bundle resultBundle)
+    {
+        var validatedAgainstProfile = false;
+        var conditionResourcePresent = false;
+
+        foreach (var e in resultBundle.Entry)
+        {
+            if (e.Resource != null)
+            {
+                if (e.Resource.TypeName == "Condition")
+                {
+                    var condition_entry = (Condition)e.Resource;
+                    if (condition_entry != null)
+                    {
+                        conditionResourcePresent = true;
+                        try
+                        {
+                            //var packageServerUrl = "https://packages.simplifier.net";
+                            var packageServerUrl = "https://registry.fhir.org";
+                            var fhirRelease = FhirRelease.R4;
+
+                            var packageResolver = FhirPackageSource.CreateCorePackageSource(ModelInfo.ModelInspector, fhirRelease, packageServerUrl);
+                            var resourceResolver = new CachedResolver(packageResolver);
+
+                            Hl7.Fhir.Specification.Source.IAsyncResourceResolver resolver = new CachedResolver(
+                                new MultiResolver(
+                                    //ZipSource.CreateValidationSource(),
+                                    new DirectorySource("Profiles", new DirectorySourceSettings()
+                                    {
+                                        IncludeSubDirectories = true,
+                                    }),
+                                    resourceResolver
+                                //new WebResolver()
+                                )
+                            );
+
+                            //var terminologyService = new LocalTerminologyService(resourceResolver);
+                            var terminologyService = new LocalTerminologyService(resolver);
+                            var settings = new FhirClientSettings
+                            {
+                                PreferredFormat = ResourceFormat.Json,
+                                Timeout = 30000,
+                            };
+
+                            //var terminolgyClient = new FhirClient("https://mirthtraining-aws.nicovn.net/fhir-subscription/", settings: settings);
+                            var terminolgyClient = new FhirClient("https://tx.fhir.org/r4", settings: settings);
+
+                            var extTerminology = new ExternalTerminologyService(terminolgyClient);
+
+                            /*
+                            Hl7.Fhir.Model.Parameters parameters = new Hl7.Fhir.Model.Parameters();
+                            parameters.
+                            var dummy = await extTerminology.Lookup(null, false);
+                            */
+
+                            var multiTermService = new MultiTerminologyService(extTerminology, terminologyService);
+
+                            var validator = new Firely.Fhir.Validation.Validator(resolver, terminologyService);
+                            //var validator = new Firely.Fhir.Validation.Validator(resolver, multiTermService);
+                            //var validator = new Firely.Fhir.Validation.Validator(resolver, extTerminology);
+
+                            var result = validator.Validate(condition_entry);
+
+                            WriteToLog(baseFilePath, correlationId, "Profile validation result : (" + condition_entry + ") " + result);
+
+                            Console.WriteLine(result);
+
+                        }
+                        catch (Exception foe)
+                        {
+                            Console.WriteLine("Unable to validate resource against profile - " + foe);
+                        }
+
+                    }
+
+                }
+
+            }
+        }
+
+        if (conditionResourcePresent)
+        {
+            return validatedAgainstProfile;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
     public static void WriteToLog(string baseFilePath, string correlationId, object messageToLog)
     {
         Console.WriteLine(messageToLog);
@@ -732,21 +833,52 @@ class Program
                 {
                     Org.BouncyCastle.Crypto.AsymmetricKeyParameter privateKey = keyEntry.Key;
 
-                    var privateRsaParams = privateKey as RsaPrivateCrtKeyParameters;
-                    rsaParams = DotNetUtilities.ToRSAParameters(privateRsaParams);
-
-                    using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+                    if (privateKey.GetType().ToString().Equals("Org.BouncyCastle.Crypto.Parameters.RsaPrivateCrtKeyParameters"))
                     {
-                        rsa.ImportParameters(rsaParams);
+                        var privateRsaParams = privateKey as RsaPrivateCrtKeyParameters;
 
-                        var jwtHeaders = new Dictionary<string, object>();
-                        jwtHeaders.Add("typ", "JWT");
-                        jwtHeaders.Add("kid", jwkSetKeyId);
-                        jwtHeaders.Add("jku", jwkSetUrl);
+                        rsaParams = DotNetUtilities.ToRSAParameters(privateRsaParams);
 
-                        String encodedJWT = Jose.JWT.Encode(claimsPayload, rsa, Jose.JwsAlgorithm.RS256, jwtHeaders);
-                        return encodedJWT;
+                        using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+                        {
+                            rsa.ImportParameters(rsaParams);
+
+                            var jwtHeaders = new Dictionary<string, object>();
+                            jwtHeaders.Add("typ", "JWT");
+                            jwtHeaders.Add("kid", jwkSetKeyId);
+                            jwtHeaders.Add("jku", jwkSetUrl);
+
+                            String encodedJWT = Jose.JWT.Encode(claimsPayload, rsa, Jose.JwsAlgorithm.RS256, jwtHeaders);
+                            return encodedJWT;
+                        }
                     }
+                    else
+                    {
+                        if (privateKey.GetType().ToString().Equals("Org.BouncyCastle.Crypto.Parameters.ECPrivateKeyParameters"))
+                        {
+                            var privateECParams = privateKey as ECPrivateKeyParameters;
+
+                            if (privateECParams != null)
+                            {
+                                ECDsa ecdsaKey = ConvertBcPrivateKeyToNetECDsa(privateECParams);
+                                var jwtHeaders = new Dictionary<string, object>();
+                                jwtHeaders.Add("typ", "JWT");
+                                jwtHeaders.Add("kid", jwkSetKeyId);
+                                jwtHeaders.Add("jku", jwkSetUrl);
+
+                                String encodedJWT = Jose.JWT.Encode(claimsPayload, ecdsaKey, Jose.JwsAlgorithm.ES384, jwtHeaders);
+
+                                return encodedJWT;
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("Unsupported private key type " + privateKey.GetType().ToString());
+                        }
+
+                    }
+
+
 
                 }
             }
@@ -756,5 +888,138 @@ class Program
 
     }
 
+    private static ECDsa ConvertBcPrivateKeyToNetECDsa(ECPrivateKeyParameters bcPrivateKey)
+    {
+        if (bcPrivateKey == null)
+            throw new ArgumentNullException(nameof(bcPrivateKey));
+
+        // 1. Extract Private Key Scalar (D)
+        // Use ToByteArrayUnsigned to get the minimal big-endian representation.
+        byte[] dBytes = bcPrivateKey.D.ToByteArrayUnsigned();
+
+        // 2. Determine the Elliptic Curve OID
+        DerObjectIdentifier curveOid = null;
+
+        if (bcPrivateKey.PublicKeyParamSet != null)
+        {
+            curveOid = bcPrivateKey.PublicKeyParamSet;
+        }
+        else if (bcPrivateKey.Parameters != null)
+        {
+            // Try to find a matching named curve by comparing domain parameters
+            ECDomainParameters bcDomainParams = bcPrivateKey.Parameters;
+            foreach (string name in ECNamedCurveTable.Names)
+            {
+                X9ECParameters x9Params = ECNamedCurveTable.GetByName(name);
+                if (x9Params.Curve.Equals(bcDomainParams.Curve) &&
+                    x9Params.G.Equals(bcDomainParams.G) &&
+                    x9Params.N.Equals(bcDomainParams.N) &&
+                    ((x9Params.H == null && bcDomainParams.H == null) || (x9Params.H != null && x9Params.H.Equals(bcDomainParams.H)))) // H can be null or 1
+                {
+                    curveOid = ECNamedCurveTable.GetOid(name);
+                    break;
+                }
+            }
+        }
+
+        if (curveOid == null)
+        {
+            throw new NotSupportedException("Could not determine the curve OID from the Bouncy Castle private key. Explicit curve parameter conversion may be required.");
+        }
+
+        // 3. Create System.Security.Cryptography.ECCurve
+        ECCurve eccCurve;
+        string oidValue = curveOid.Id;
+        string friendlyNameFromBc = ECNamedCurveTable.GetName(curveOid); // Bouncy Castle's name for the OID
+
+        try
+        {
+            // Use Oid class, providing friendlyName is good practice for debugging/logging
+            System.Security.Cryptography.Oid netOid = new System.Security.Cryptography.Oid(oidValue, friendlyNameFromBc ?? oidValue);
+            eccCurve = ECCurve.CreateFromOid(netOid);
+        }
+        catch (CryptographicException ex)
+        {
+            // Fallback for common NIST curves if CreateFromOid fails with BC's friendly name
+            // or if .NET expects a slightly different friendly name.
+            // .NET often uses names like "nistP256" for "secp256r1"/"prime256v1".
+            if (oidValue == X9ObjectIdentifiers.Prime256v1.Id) // secp256r1
+                eccCurve = ECCurve.NamedCurves.nistP256;
+            else if (oidValue == SecNamedCurves.GetOid("secp384r1").Id)
+                eccCurve = ECCurve.NamedCurves.nistP384;
+            else if (oidValue == SecNamedCurves.GetOid("secp521r1").Id)
+                eccCurve = ECCurve.NamedCurves.nistP521;
+            else
+            {
+                throw new NotSupportedException($"Curve with OID {oidValue} (Friendly Name: {friendlyNameFromBc}) could not be mapped to a .NET ECCurve.", ex);
+            }
+        }
+
+        // 4. Populate System.Security.Cryptography.ECParameters
+        ECParameters ecParams = new ECParameters
+        {
+            D = dBytes,
+            Curve = eccCurve
+        };
+
+        // Optionally, derive and set the public key Q.
+        // ECDsa.ImportParameters can derive Q, but it's good to be explicit.
+        ECDomainParameters domainParamsToDeriveQ = bcPrivateKey.Parameters;
+        if (domainParamsToDeriveQ == null && curveOid != null) // If only OID was available initially
+        {
+            X9ECParameters x9Params = ECNamedCurveTable.GetByOid(curveOid);
+            if (x9Params != null)
+            {
+                domainParamsToDeriveQ = new ECDomainParameters(x9Params.Curve, x9Params.G, x9Params.N, x9Params.H, x9Params.GetSeed());
+            }
+        }
+
+        if (domainParamsToDeriveQ != null)
+        {
+            Org.BouncyCastle.Math.EC.ECPoint qPublicPoint = domainParamsToDeriveQ.G.Multiply(bcPrivateKey.D);
+
+            // *** FIX: Normalize the point before accessing affine coordinates ***
+            if (qPublicPoint != null && !qPublicPoint.IsNormalized())
+            {
+                qPublicPoint = qPublicPoint.Normalize();
+            }
+
+            // Ensure qPublicPoint is not null after potential normalization or if G.Multiply resulted in infinity (unlikely for valid private keys)
+            if (qPublicPoint == null || qPublicPoint.IsInfinity)
+            {
+                throw new CryptographicException("Failed to derive a valid public key point (possibly resulted in point at infinity).");
+            }
+
+            ecParams.Q = new ECPoint // System.Security.Cryptography.ECPoint
+            {
+                X = qPublicPoint.AffineXCoord.ToBigInteger().ToByteArrayUnsigned(),
+                Y = qPublicPoint.AffineYCoord.ToBigInteger().ToByteArrayUnsigned()
+            };
+        }
+        else
+        {
+            // If Q cannot be derived here, .NET's ImportParameters will attempt to derive it.
+            // Log or handle this case if Q is strictly needed upfront.
+            // Consider throwing an exception if domain parameters are essential and missing.
+            Console.WriteLine("Warning: Could not obtain domain parameters to derive public key Q explicitly; relying on .NET to derive it during import if possible.");
+        }
+
+        // 5. Import into System.Security.Cryptography.ECDsa
+        ECDsa ecdsa = ECDsa.Create(); // Creates a default ECDsa implementation (e.g., ECDsaCng on Windows, ECDsaOpenSsl on Linux)
+
+        try
+        {
+            ecdsa.ImportParameters(ecParams);
+        }
+        catch (CryptographicException ex)
+        {
+            // This can happen if D is invalid for the curve, or Q is malformed/inconsistent.
+            throw new CryptographicException("Failed to import ECParameters into ECDsa object. " +
+                                             $"Ensure curve is supported and parameters are valid. D length: {dBytes.Length}, " +
+                                             $"Curve: {eccCurve.Oid?.FriendlyName ?? eccCurve.CurveType.ToString()}", ex);
+        }
+
+        return ecdsa;
+    }
 
 }

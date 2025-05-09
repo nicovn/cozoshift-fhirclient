@@ -1,0 +1,308 @@
+{
+  "index-version" : 2,
+  "files" : [
+    {
+      "filename" : "ImplementationGuide-hl7.fhir.be.core-clinical.json",
+      "resourceType" : "ImplementationGuide",
+      "id" : "hl7.fhir.be.core-clinical",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/ImplementationGuide/hl7.fhir.be.core-clinical",
+      "version" : "1.0.1"
+    },
+    {
+      "filename" : "CodeSystem-be-cs-bodysite.json",
+      "resourceType" : "CodeSystem",
+      "id" : "be-cs-bodysite",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/CodeSystem/be-cs-bodysite",
+      "version" : "1.0.1",
+      "content" : "complete"
+    },
+    {
+      "filename" : "CodeSystem-be-cs-problem-category.json",
+      "resourceType" : "CodeSystem",
+      "id" : "be-cs-problem-category",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/CodeSystem/be-cs-problem-category",
+      "version" : "1.0.1",
+      "content" : "complete"
+    },
+    {
+      "filename" : "CodeSystem-be-cs-problem-origin-type.json",
+      "resourceType" : "CodeSystem",
+      "id" : "be-cs-problem-origin-type",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/CodeSystem/be-cs-problem-origin-type",
+      "version" : "1.0.1",
+      "content" : "complete"
+    },
+    {
+      "filename" : "CodeSystem-be-cs-score-category.json",
+      "resourceType" : "CodeSystem",
+      "id" : "be-cs-score-category",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/CodeSystem/be-cs-score-category",
+      "version" : "1.0.1",
+      "content" : "complete"
+    },
+    {
+      "filename" : "CodeSystem-be-cs-score.json",
+      "resourceType" : "CodeSystem",
+      "id" : "be-cs-score",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/CodeSystem/be-cs-score",
+      "version" : "1.0.1",
+      "content" : "complete"
+    },
+    {
+      "filename" : "StructureDefinition-BeAppointment.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeAppointment",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeAppointment",
+      "version" : "1.0.1",
+      "kind" : "resource",
+      "type" : "Appointment",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-BeCarePlan.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeCarePlan",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeCarePlan",
+      "version" : "1.0.1",
+      "kind" : "resource",
+      "type" : "CarePlan",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-BeClinicalImpression.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeClinicalImpression",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeClinicalImpression",
+      "version" : "1.0.1",
+      "kind" : "resource",
+      "type" : "ClinicalImpression",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-BeGoal.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeGoal",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeGoal",
+      "version" : "1.0.1",
+      "kind" : "resource",
+      "type" : "Goal",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-BeModelAppointment.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeModelAppointment",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeModelAppointment",
+      "version" : "1.0.1",
+      "kind" : "logical",
+      "type" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeModelAppointment",
+      "derivation" : "specialization"
+    },
+    {
+      "filename" : "StructureDefinition-BeModelCarePlan.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeModelCarePlan",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeModelCarePlan",
+      "version" : "1.0.1",
+      "kind" : "logical",
+      "type" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeModelCarePlan",
+      "derivation" : "specialization"
+    },
+    {
+      "filename" : "StructureDefinition-BeModelClinicalImpression.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeModelClinicalImpression",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeModelClinicalImpression",
+      "version" : "1.0.1",
+      "kind" : "logical",
+      "type" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeModelClinicalImpression",
+      "derivation" : "specialization"
+    },
+    {
+      "filename" : "StructureDefinition-BeModelEncounter.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeModelEncounter",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeModelEncounter",
+      "version" : "1.0.1",
+      "kind" : "logical",
+      "type" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeModelEncounter",
+      "derivation" : "specialization"
+    },
+    {
+      "filename" : "StructureDefinition-BeModelGoal.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeModelGoal",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeModelGoal",
+      "version" : "1.0.1",
+      "kind" : "logical",
+      "type" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeModelGoal",
+      "derivation" : "specialization"
+    },
+    {
+      "filename" : "StructureDefinition-BeModelServiceRequest.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "BeModelServiceRequest",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeModelServiceRequest",
+      "version" : "1.0.1",
+      "kind" : "logical",
+      "type" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/BeModelServiceRequest",
+      "derivation" : "specialization"
+    },
+    {
+      "filename" : "StructureDefinition-be-encounter.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-encounter",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/be-encounter",
+      "version" : "1.0.1",
+      "kind" : "resource",
+      "type" : "Encounter",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-ext-laterality.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-ext-laterality",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/be-ext-laterality",
+      "version" : "1.0.1",
+      "kind" : "complex-type",
+      "type" : "Extension",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-ext-problem-origin-type.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-ext-problem-origin-type",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/be-ext-problem-origin-type",
+      "version" : "1.0.1",
+      "kind" : "complex-type",
+      "type" : "Extension",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-observation.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-observation",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/be-observation",
+      "version" : "1.0.1",
+      "kind" : "resource",
+      "type" : "Observation",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-observationcodeableconcept.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-observationcodeableconcept",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/be-observationcodeableconcept",
+      "version" : "1.0.1",
+      "kind" : "complex-type",
+      "type" : "CodeableConcept",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-problem.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-problem",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/be-problem",
+      "version" : "1.0.1",
+      "kind" : "resource",
+      "type" : "Condition",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-procedure.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-procedure",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/be-procedure",
+      "version" : "1.0.1",
+      "kind" : "resource",
+      "type" : "Procedure",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-questionnaire-response.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-questionnaire-response",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/be-questionnaire-response",
+      "version" : "1.0.1",
+      "kind" : "resource",
+      "type" : "QuestionnaireResponse",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-scoreresult.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-scoreresult",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/be-scoreresult",
+      "version" : "1.0.1",
+      "kind" : "resource",
+      "type" : "Observation",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-be-service-request.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "be-service-request",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/StructureDefinition/be-service-request",
+      "version" : "1.0.1",
+      "kind" : "resource",
+      "type" : "ServiceRequest",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "ValueSet-be-vs-bodysite.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-vs-bodysite",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/ValueSet/be-vs-bodysite",
+      "version" : "1.0.1"
+    },
+    {
+      "filename" : "ValueSet-be-vs-laterality.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-vs-laterality",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/ValueSet/be-vs-laterality",
+      "version" : "1.0.1"
+    },
+    {
+      "filename" : "ValueSet-be-vs-problem-category.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-vs-problem-category",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/ValueSet/be-vs-problem-category",
+      "version" : "1.0.1"
+    },
+    {
+      "filename" : "ValueSet-be-vs-problem-code.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-vs-problem-code",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/ValueSet/be-vs-problem-code",
+      "version" : "1.0.1"
+    },
+    {
+      "filename" : "ValueSet-be-vs-problem-origin-type.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-vs-problem-origin-type",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/ValueSet/be-vs-problem-origin-type",
+      "version" : "1.0.1"
+    },
+    {
+      "filename" : "ValueSet-be-vs-reaction-manifestation-code.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-vs-reaction-manifestation-code",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/ValueSet/be-vs-reaction-manifestation-code",
+      "version" : "1.0.1"
+    },
+    {
+      "filename" : "ValueSet-be-vs-score.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-vs-score",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/ValueSet/be-vs-score",
+      "version" : "1.0.1"
+    },
+    {
+      "filename" : "ValueSet-be-vs-scorecategory.json",
+      "resourceType" : "ValueSet",
+      "id" : "be-vs-scorecategory",
+      "url" : "https://www.ehealth.fgov.be/standards/fhir/core-clinical/ValueSet/be-vs-scorecategory",
+      "version" : "1.0.1"
+    }
+  ]
+}
