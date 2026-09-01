@@ -35,6 +35,12 @@ using Firely.Fhir.Packages;
 using Firely.Fhir.Validation;
 using Org.BouncyCastle.Asn1.X9;
 using Org.BouncyCastle.Asn1.Sec;
+using System.Text;
+using System.Text.Json.Nodes;
+using System.Net;
+using System.Globalization;
+using System.Text.Json;
+using Hl7.Fhir.Utility;
 
 class Program
 {
@@ -75,7 +81,7 @@ class Program
             // store the repo configuration a file
             using (StreamWriter file = File.CreateText(fhirRepositoryConfigFile))
             {
-                JsonSerializer serializer = new JsonSerializer();
+                Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
                 serializer.Formatting = Formatting.Indented;
                 serializer.Serialize(file, fhirRepositoryConfig);
 
@@ -260,9 +266,10 @@ class Program
 
 
 
-        var typeFHIRQuery = Prompt.Select("Type FHIR query", new[] { "Allergien", "Problemen/Antecedenten", "Custom" });
+        var typeFHIRQuery = Prompt.Select("Type FHIR query", new[] { "Allergien", "Problemen/Antecedenten", "Documenten (async)", "Custom" });
         var fhirResourceName = "";
         var defaultQueryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        var asyncQuery = false;
 
         switch (typeFHIRQuery)
         {
@@ -294,6 +301,11 @@ class Program
                 fhirResourceName = Prompt.Input<string>("Resource: ", defaultValue: "");
                 break;
 
+            case "Documenten (async)":
+                fhirResourceName = "Patient";
+                asyncQuery = true;
+                break;
+
         }
 
         // Add specific query parameters for FHIRStation debugging
@@ -310,28 +322,17 @@ class Program
             Console.WriteLine("Path = /" + fhirResourceName);
         }
 
-        var searchQueryString = Prompt.Input<string>("Search query string: ", defaultValue: defaultSearchQueryString);
+        string searchQueryString = null;
+        if (!asyncQuery)
+        {
+            searchQueryString = Prompt.Input<string>("Search query string: ", defaultValue: defaultSearchQueryString);
+            WriteToLog(baseFilePath, correlationId, "Search query string: " + searchQueryString);
+        }
 
-        WriteToLog(baseFilePath, correlationId, "Search query string: " + searchQueryString);
+
         WriteToLog(baseFilePath, correlationId, "");
 
         // END configuration data
-
-        var searchQueryNameValueCollection = System.Web.HttpUtility.ParseQueryString(searchQueryString);
-        var queryParameters = new List<string>();
-        for (int i = 0; i < searchQueryNameValueCollection.Count; i++)
-        {
-            var parameterName = searchQueryNameValueCollection.GetKey(i);
-            if (searchQueryNameValueCollection.GetValues(i) != null)
-            {
-                string[] parameterValues = searchQueryNameValueCollection.GetValues(i)!;
-                foreach (string paramValue in parameterValues)
-                {
-                    queryParameters.Add(parameterName + "=" + paramValue);
-
-                }
-            }
-        }
 
         var tokenClient = new HttpClient(new LoggingHandler(new HttpClientHandler(), baseFilePath, correlationId));
 
@@ -502,29 +503,331 @@ class Program
 
                 try
                 {
-                    var results = await client.SearchUsingPostAsync(fhirResourceName, queryParameters.ToArray(), pageSize: fhirRepositoryConfig.MaxResultsPerPage);
 
-                    if (results != null)
+                    if (!asyncQuery)
                     {
-                        WriteToLog(baseFilePath, correlationId, "Formatted JSON response:");
-                        WriteToLog(baseFilePath, correlationId, "");
-                        WriteToLog(baseFilePath, correlationId, JToken.Parse(results.ToJson()).ToString(Formatting.Indented));
-
-                        await ValidateResourceAgainstBEProfile(baseFilePath, correlationId, client, results);
-
-                        await FetchConditionsPractitionerRole(client, results);
-
-                        while (results != null)
+                        var searchQueryNameValueCollection = System.Web.HttpUtility.ParseQueryString(searchQueryString);
+                        var queryParameters = new List<string>();
+                        for (int i = 0; i < searchQueryNameValueCollection.Count; i++)
                         {
-                            results = await client.ContinueAsync(results);
-                            if (results != null)
+                            var parameterName = searchQueryNameValueCollection.GetKey(i);
+                            if (searchQueryNameValueCollection.GetValues(i) != null)
                             {
-                                WriteToLog(baseFilePath, correlationId, "Next page fetched");
-                                WriteToLog(baseFilePath, correlationId, JToken.Parse(results.ToJson()).ToString(Formatting.Indented));
+                                string[] parameterValues = searchQueryNameValueCollection.GetValues(i)!;
+                                foreach (string paramValue in parameterValues)
+                                {
+                                    queryParameters.Add(parameterName + "=" + paramValue);
 
-                                await FetchConditionsPractitionerRole(client, results);
+                                }
                             }
                         }
+
+
+                        var results = await client.SearchUsingPostAsync(fhirResourceName, queryParameters.ToArray(), pageSize: fhirRepositoryConfig.MaxResultsPerPage);
+
+                        if (results != null)
+                        {
+                            WriteToLog(baseFilePath, correlationId, "Formatted JSON response:");
+                            WriteToLog(baseFilePath, correlationId, "");
+                            WriteToLog(baseFilePath, correlationId, JToken.Parse(results.ToJson()).ToString(Formatting.Indented));
+
+                            await ValidateResourceAgainstBEProfile(baseFilePath, correlationId, client, results);
+
+                            await FetchConditionsPractitionerRole(client, results);
+
+                            while (results != null)
+                            {
+                                results = await client.ContinueAsync(results);
+                                if (results != null)
+                                {
+                                    WriteToLog(baseFilePath, correlationId, "Next page fetched");
+                                    WriteToLog(baseFilePath, correlationId, JToken.Parse(results.ToJson()).ToString(Formatting.Indented));
+
+                                    await FetchConditionsPractitionerRole(client, results);
+                                }
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        // here async query
+                        var asyncHandler = new HttpClientHandler
+                        {
+                            //AllowAutoRedirect = false
+                        };
+                        using var asyncHttpClient = new HttpClient(asyncHandler);
+                        if ((tokenResponse != null) && (tokenResponse.AccessToken != null))
+                        {
+                            asyncHttpClient.SetToken("Bearer", tokenResponse.AccessToken);
+                        }
+
+                        var kickOffUrl = $"{fhirRepositoryConfig.FhirEndpoint.TrimEnd('/')}/Patient/$export";
+                        var request = new HttpRequestMessage(HttpMethod.Get, kickOffUrl);
+
+                        var parametersResource = new Hl7.Fhir.Model.Parameters();
+
+                        parametersResource.Add("_outputFormat", new Hl7.Fhir.Model.FhirString("application/fhir+ndjson"));
+                        parametersResource.Add("_since", new Hl7.Fhir.Model.Instant(DateTime.Parse("01.01.2000", new CultureInfo("nl-BE"))));
+                        parametersResource.Add("_until", new Hl7.Fhir.Model.Instant(DateTime.Now));
+                        parametersResource.Add("_type", new Hl7.Fhir.Model.FhirString("DocumentReference"));
+                        parametersResource.Add("_typeFilter", new Hl7.Fhir.Model.FhirString("DocumentReference?status=current"));
+
+                        var patientRef = new ResourceReference();
+                        patientRef.Type = "Patient";
+                        patientRef.Identifier = new Identifier();
+                        patientRef.Identifier.System = patientIdentifierSystem;
+                        patientRef.Identifier.Value = patientIdentifier;
+
+                        parametersResource.Add("patient", patientRef);
+
+                        var FhirJsonSerializer = new FhirJsonSerializer();
+                        var jsParameters = await FhirJsonSerializer.SerializeToStringAsync(parametersResource);
+
+
+                        var requestContent = new StringContent(jsParameters, Encoding.UTF8, "application/fhir+json");
+
+                        // The HL7 specification strictly requires the respond-async header
+                        requestContent.Headers.Add("Prefer", "respond-async");
+                        asyncHttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/fhir+json"));
+                        //asyncHttpClient.DefaultRequestHeaders.Add("Access-Control-Allow-Origin", "*");
+
+                        WriteToLog(baseFilePath, correlationId, "Sending HTTP POST request to " + kickOffUrl);
+                        WriteToLog(baseFilePath, correlationId, "");
+                        var requestBody = await requestContent.ReadAsStringAsync();
+                        WriteToLog(baseFilePath, correlationId, "Request headers: " + requestContent.Headers);
+                        WriteToLog(baseFilePath, correlationId, "Request body: " + requestBody);
+
+                        var kickOffResponse = await asyncHttpClient.PostAsync(kickOffUrl, requestContent);
+
+                        kickOffResponse.EnsureSuccessStatusCode();
+
+                        WriteToLog(baseFilePath, correlationId, "");
+                        WriteToLog(baseFilePath, correlationId, "Received HTTP response status: " + kickOffResponse.StatusCode);
+
+                        if (kickOffResponse.StatusCode != HttpStatusCode.Accepted)
+                        {
+                            WriteToLog(baseFilePath, correlationId, $"Export initiation failed with status: {kickOffResponse.StatusCode}");
+                            return;
+                        }
+
+                        var responseBody = await kickOffResponse.Content.ReadAsStringAsync();
+                        if ((responseBody != null) && (!responseBody.Equals("")))
+                        {
+                            WriteToLog(baseFilePath, correlationId, "Response body: " + responseBody);
+                        }
+
+                        var statusUrl = kickOffResponse.Content.Headers.ContentLocation?.ToString();
+                        WriteToLog(baseFilePath, correlationId, "Response 'Content-Location' header: " + statusUrl);
+
+                        // Polling Loop
+                        BulkExportManifest manifest = null;
+                        while (true)
+                        {
+                            WriteToLog(baseFilePath, correlationId, "Checking export status at " + statusUrl);
+                            var statusResponse = await asyncHttpClient.GetAsync(statusUrl);
+
+                            if (statusResponse.StatusCode == HttpStatusCode.OK)
+                            {
+                                // Export complete! Parse the JSON manifest response body
+                                var jsonContent = await statusResponse.Content.ReadAsStringAsync();
+                                WriteToLog(baseFilePath, correlationId, "Export complete");
+                                WriteToLog(baseFilePath, correlationId, "Response body: " + jsonContent);
+                                manifest = System.Text.Json.JsonSerializer.Deserialize<BulkExportManifest>(jsonContent, new JsonSerializerOptions
+                                {
+                                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                                });
+                                break;
+                            }
+                            else if (statusResponse.StatusCode == HttpStatusCode.Accepted)
+                            {
+                                // Still processing. Determine delay from Retry-After header or default to 5 seconds
+                                int delaySeconds = 5;
+                                if (statusResponse.Headers.RetryAfter?.Delta != null)
+                                {
+                                    delaySeconds = (int)statusResponse.Headers.RetryAfter.Delta.Value.TotalSeconds;
+                                }
+
+                                WriteToLog(baseFilePath, correlationId, $"Processing in progress. Waiting {delaySeconds} seconds...");
+                                await System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+                            }
+                            else
+                            {
+                                WriteToLog(baseFilePath, correlationId, $"Error during polling: {statusResponse.StatusCode}");
+                                return;
+                            }
+                        }
+
+                        // Download and Process the NDJSON files
+                        if (manifest?.Output != null)
+                        {
+                            var parser = new FhirJsonParser();
+
+                            WriteToLog(baseFilePath, correlationId, "The FHIR server has generated " + manifest.Output.Length + " output files");
+
+                            var listOfDocuments = new List<DocumentSummary>();
+
+                            foreach (var outputFile in manifest.Output)
+                            {
+                                WriteToLog(baseFilePath, correlationId, $"\nDownloading {outputFile.Type} file from: {outputFile.Url}");
+
+                                // Fetch the individual NDJSON file stream
+                                using var fileStream = await asyncHttpClient.GetStreamAsync(outputFile.Url);
+                                using var reader = new StreamReader(fileStream);
+
+                                string line;
+                                int resourceCount = 0;
+
+                                // Read the NDJSON file line by line (each line is a complete FHIR JSON Resource)
+                                while ((line = await reader.ReadLineAsync()) != null)
+                                {
+                                    if (string.IsNullOrWhiteSpace(line)) continue;
+
+                                    try
+                                    {
+                                        // Use Firely SDK to deserialize the raw JSON text into a typed Resource object
+                                        Resource resource = await parser.ParseAsync<Resource>(line);
+                                        resourceCount++;
+
+                                        // Process your typed resource data here
+                                        if (resource is DocumentReference documentreference)
+                                        {
+                                            WriteToLog(baseFilePath, correlationId, $"Parsed DocumentReference: {documentreference.Id} - {documentreference.MasterIdentifier.Value?.ToString()}");
+
+                                            // public static void WriteFHIRResourceToFile(string baseFilePath, string correlationId, string fhirResource, string resourceId)
+                                            FhirJsonSerializer.Settings.Pretty = true;
+                                            var jsonDocumentReference = await FhirJsonSerializer.SerializeToStringAsync(resource);
+
+                                            WriteFHIRResourceToFile(baseFilePath, correlationId, jsonDocumentReference, "DocumentReference", documentreference.Id);
+
+
+                                            var documentSummary = new DocumentSummary();
+                                            documentSummary.Id = documentreference.Id;
+                                            foreach (Identifier identifier in documentreference.Identifier)
+                                            {
+                                                documentSummary.Identifier = identifier.Value;
+                                                documentSummary.IdentifierSystem = identifier.System;
+                                            }
+                                            documentSummary.Title = documentreference.Description;
+                                            documentSummary.Facility = documentreference.Custodian.Display;
+                                            if (documentreference.Date != null)
+                                            {
+                                                documentSummary.DocumentDate = documentreference.Date.Value.ToString("yyyy/MM/dd");
+                                            }
+
+                                            if (documentreference.Content != null)
+                                            {
+                                                foreach (BackboneElement bbeDocumentContent in documentreference.Content)
+                                                {
+                                                    if (bbeDocumentContent is Hl7.Fhir.Model.DocumentReference.ContentComponent)
+                                                    {
+                                                        var documentContent = (Hl7.Fhir.Model.DocumentReference.ContentComponent)bbeDocumentContent;
+
+                                                        if ((documentContent.Attachment.Url != null) && (documentContent.Attachment.ContentType != null))
+                                                        {
+                                                            documentSummary.DocumentContents.Add(new DocumentSummary.DocumentContent(documentContent.Attachment.Url, documentContent.Attachment.ContentType));
+                                                        }
+                                                        else
+                                                        {
+                                                            if (documentContent.Attachment.Url != null)
+                                                            {
+                                                                documentSummary.DocumentContents.Add(new DocumentSummary.DocumentContent(documentContent.Attachment.Url, "application/pdf"));
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            listOfDocuments.Add(documentSummary);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        WriteToLog(baseFilePath, correlationId, $"Error parsing FHIR resource: {ex.Message}");
+                                        WriteToLog(baseFilePath, correlationId, line);
+                                    }
+                                }
+                                WriteToLog(baseFilePath, correlationId, $"Finished processing {resourceCount} {outputFile.Type} resources from this file.");
+                            }
+
+                            if (!listOfDocuments.IsNullOrEmpty())
+                            {
+                                var downloadDocumentContentsYesNo = Prompt.Select("Download de inhoud van een (of meerdere) document(en) ?",
+                                    new[] { "ja", "neen" }, defaultValue: "ja");
+
+                                var downloadDocumentContents = false;
+                                if (downloadDocumentContentsYesNo.Equals("ja"))
+                                {
+                                    downloadDocumentContents = true;
+                                }
+
+                                if (downloadDocumentContents)
+                                {
+                                    List<DocumentSummary> sortedDocumentsList = listOfDocuments.OrderByDescending(o => o.DocumentDate).ToList();
+
+                                    var whichDocuments = Prompt.Select("Welke documenten wilt U downloaden",
+                                        new[] { "alle", "een specifiek document" }, defaultValue: "een specifiek document");
+
+                                    if ((whichDocuments != null) && (whichDocuments.Equals("alle")))
+                                    {
+                                        // alle documenten downloaden
+                                        foreach (DocumentSummary selectedDocument in sortedDocumentsList)
+                                        {
+                                            foreach (DocumentSummary.DocumentContent content in selectedDocument.DocumentContents)
+                                            {
+                                                var binaryResource = await client.ReadAsync<Binary>(content.Url);
+
+                                                if (binaryResource != null)
+                                                {
+                                                    FhirJsonSerializer.Settings.Pretty = true;
+                                                    var jsonBinary = await FhirJsonSerializer.SerializeToStringAsync(binaryResource);
+
+                                                    WriteFHIRResourceToFile(baseFilePath, correlationId, jsonBinary, "Binary", binaryResource.Id);
+
+                                                    WriteBinaryDataToFile(baseFilePath, correlationId, binaryResource.Id, binaryResource.ContentType,
+                                                        binaryResource.Data);
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // specifiek document downloaden
+                                        var selectedDocument = Prompt.Select("Selecteer document", sortedDocumentsList, 10);
+
+                                        if (selectedDocument != null)
+                                        {
+                                            Console.WriteLine("Selected document is " + selectedDocument);
+                                            foreach (DocumentSummary.DocumentContent content in selectedDocument.DocumentContents)
+                                            {
+                                                //var binaryResult = await client.SearchUsingPostAsync(fhirResourceName, queryParameters.ToArray(), pageSize: fhirRepositoryConfig.MaxResultsPerPage);
+                                                var binaryResource = await client.ReadAsync<Binary>(content.Url);
+
+                                                if (binaryResource != null)
+                                                {
+                                                    FhirJsonSerializer.Settings.Pretty = true;
+                                                    var jsonBinary = await FhirJsonSerializer.SerializeToStringAsync(binaryResource);
+
+                                                    WriteFHIRResourceToFile(baseFilePath, correlationId, jsonBinary, "Binary", binaryResource.Id);
+
+                                                    WriteBinaryDataToFile(baseFilePath, correlationId, binaryResource.Id, binaryResource.ContentType,
+                                                        binaryResource.Data, true);
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+
+                            }
+                        }
+                        else
+                        {
+                            WriteToLog(baseFilePath, correlationId, "Warning - the FHIR server did not generate any output files");
+                        }
+
                     }
                 }
                 catch (Exception foe)
@@ -746,6 +1049,71 @@ class Program
         }
         File.AppendAllText(logPath + @"\" + correlationId + ".txt", messageToLog + Environment.NewLine);
     }
+
+    public static void WriteFHIRResourceToFile(string baseFilePath, string correlationId, string fhirResource, string resourceType, string resourceId)
+    {
+        var logPath = baseFilePath + @"\logs";
+        if (!Directory.Exists(logPath))
+        {
+            Directory.CreateDirectory(logPath);
+        }
+        var fhirLogPath = logPath + @"\" + correlationId;
+        if (!Directory.Exists(fhirLogPath))
+        {
+            Directory.CreateDirectory(fhirLogPath);
+        }
+
+        var resourceFilePath = fhirLogPath + @"\" + resourceType.ToLower() + "_" + resourceId + ".json";
+        File.WriteAllText(resourceFilePath, fhirResource);
+
+        WriteToLog(baseFilePath, correlationId, "FHIR " + resourceType + " resource opgeslagen in bestand " + resourceFilePath);
+    }
+
+    public static void WriteBinaryDataToFile(string baseFilePath, string correlationId, string resourceId,
+        string contentType, byte[] binaryData, bool openFileViewer = false)
+    {
+        var logPath = baseFilePath + @"\logs";
+        if (!Directory.Exists(logPath))
+        {
+            Directory.CreateDirectory(logPath);
+        }
+        var fhirLogPath = logPath + @"\" + correlationId;
+        if (!Directory.Exists(fhirLogPath))
+        {
+            Directory.CreateDirectory(fhirLogPath);
+        }
+
+        var fileExtension = "bin";
+        if (contentType.Contains("pdf"))
+        {
+            fileExtension = "pdf";
+        }
+        else
+        {
+            if (contentType.Contains("json"))
+            {
+                fileExtension = "json";
+            }
+
+        }
+
+        var binaryFilePath = fhirLogPath + @"\" + resourceId + "." + fileExtension;
+        File.WriteAllBytes(binaryFilePath, binaryData);
+
+        WriteToLog(baseFilePath, correlationId, "Document inhoud opgeslagen in bestand " + binaryFilePath);
+
+        if (openFileViewer)
+        {
+            var startInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = binaryFilePath,
+                UseShellExecute = true
+            };
+            System.Diagnostics.Process.Start(startInfo);
+        }
+    }
+
+
 
     public static string? CreateAuthenticationJWT(Dictionary<string, object> claimsPayload, FhirRepositoryConfig fhirRepositoryConfig)
     {
@@ -1022,4 +1390,25 @@ class Program
         return ecdsa;
     }
 
+    // Strongly typed model objects matching the official FHIR Bulk Export Manifest JSON structure
+    public class BulkExportManifest
+    {
+        public string TransactionTime { get; set; }
+        public string Request { get; set; }
+        public bool RequiresAccessToken { get; set; }
+        public BulkExportOutput[] Output { get; set; }
+        public BulkExportError[] Error { get; set; }
+    }
+
+    public class BulkExportOutput
+    {
+        public string Type { get; set; }
+        public string Url { get; set; }
+    }
+
+    public class BulkExportError
+    {
+        public string Type { get; set; }
+        public string Url { get; set; }
+    }
 }
