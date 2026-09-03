@@ -425,9 +425,14 @@ class Program
 
                 handler.OnBeforeRequest += async (sender, e) =>
                 {
-                    if (tokenResponse != null)
+                    if ((tokenResponse != null) && (tokenResponse.AccessToken != null))
                     {
                         e.RawRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.AccessToken);
+                    }
+                    else
+                    {
+                        WriteToLog(baseFilePath, correlationId, "ERROR - Missing JWT token to include in FHIR request - stop processing");
+                        Environment.Exit(-1);
                     }
 
                     // Generate a Provenance FHIR resource - to send in a header
@@ -561,6 +566,12 @@ class Program
                         {
                             asyncHttpClient.SetToken("Bearer", tokenResponse.AccessToken);
                         }
+                        else
+                        {
+                            WriteToLog(baseFilePath, correlationId, "ERROR - Missing JWT token to include in FHIR request - stop processing");
+                            Environment.Exit(-1);
+                        }
+
 
                         var kickOffUrl = $"{fhirRepositoryConfig.FhirEndpoint.TrimEnd('/')}/Patient/$export";
                         var request = new HttpRequestMessage(HttpMethod.Get, kickOffUrl);

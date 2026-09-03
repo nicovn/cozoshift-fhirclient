@@ -25,13 +25,23 @@ public class LoggingHandler : DelegatingHandler
         }
         WriteToLog();
 
-        HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
+        HttpResponseMessage response = null;
 
-        WriteToLog("HTTP Response:");
-        WriteToLog(response.ToString());
-        if (response.Content != null)
+        try
         {
-            WriteToLog(await response.Content.ReadAsStringAsync());
+            response = await base.SendAsync(request, cancellationToken);
+
+            WriteToLog("HTTP Response:");
+            WriteToLog(response.ToString());
+            if (response.Content != null)
+            {
+                WriteToLog(await response.Content.ReadAsStringAsync());
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLog("ERROR sending HTTP request to endpoint " + request.RequestUri);
+            WriteToLog(e.Message);
         }
         WriteToLog(new string('-', 80));
         WriteToLog();
